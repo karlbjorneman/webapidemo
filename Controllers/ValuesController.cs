@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 // using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using MongoDB.Bson;
+using AutoMapper;
 
 namespace webapidemo.Controllers
 {
@@ -12,11 +14,14 @@ namespace webapidemo.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        IMongoDatabase _database;
-        IMongoCollection<Fruit> _fruitCollection;
+        private IMongoDatabase _database;
+        private IMongoCollection<Fruit> _fruitCollection;
+        private IMapper _mapper;
 
-        public ValuesController()
+        public ValuesController(IMapper mapper)
         {
+            _mapper = mapper;
+
             MongoClient mongoClient = new MongoClient("mongodb://thebear:KgjFg713Walle@cluster0-shard-00-00-kbgve.azure.mongodb.net:27017,cluster0-shard-00-01-kbgve.azure.mongodb.net:27017,cluster0-shard-00-02-kbgve.azure.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true");
             _database = mongoClient.GetDatabase("mongodbdemo");
             _fruitCollection = _database.GetCollection<Fruit>("Fruit");
@@ -47,8 +52,13 @@ namespace webapidemo.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [AcceptVerbs("PUT", "OPTIONS")]
+        public async Task Put(string id, [FromBody] FruitEnity value)
         {
+            Fruit fruit = _mapper.Map<Fruit>(value);
+
+            ObjectId objectId = new ObjectId(id);
+            await _fruitCollection.ReplaceOneAsync(f => f.Id == objectId, fruit);
         }
 
         // DELETE api/values/5

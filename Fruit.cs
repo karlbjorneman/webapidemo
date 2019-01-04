@@ -10,6 +10,7 @@ namespace webapidemo
     public class Fruit
     {
         [BsonId]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
         [BsonElement("name")]
         public string Name { get; set; }

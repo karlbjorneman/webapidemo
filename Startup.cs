@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using AutoMapper;
 
 namespace webapidemo
 {
@@ -24,7 +25,12 @@ namespace webapidemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // services.AddCors(options =>
+            // {
+            //     options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
+            // });
             services.AddCors();
+            services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .ConfigureApiBehaviorOptions(options =>
             {
@@ -47,7 +53,7 @@ namespace webapidemo
             }
 
             app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:3000").AllowAnyHeader());
+                builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
             app.UseMvc();
         }
     }
