@@ -44,10 +44,12 @@ namespace webapidemo.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<IEnumerable<NoteEntity>>> Get(string name)
         {
-            var indexModel = new CreateIndexModel<NoteDto>(Builders<NoteDto>.IndexKeys.Text(p => p.Header));
+            var indexModel = new CreateIndexModel<NoteDto>(Builders<NoteDto>.IndexKeys.Combine(
+                Builders<NoteDto>.IndexKeys.Text(p => p.Header),
+                Builders<NoteDto>.IndexKeys.Text(p => p.Body )));
             _notesCollection.Indexes.CreateOne(indexModel);
 
-            var notes = await _notesCollection.Find(Builders<NoteDto>.Filter.Text(name)).ToListAsync();
+            var notes = await _notesCollection.Find(Builders<NoteDto>.Filter.Text($"\"{name}\"")).ToListAsync();
             if (notes == null)
                 return new NoteEntity[0];
 
