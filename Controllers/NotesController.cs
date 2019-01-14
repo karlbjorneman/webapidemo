@@ -15,19 +15,25 @@ namespace webapidemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class NotesController : ControllerBase
     {
         private IMongoDatabase _database;
         private IMongoCollection<NoteDto> _notesCollection;
         private IMapper _mapper;
 
-        public ValuesController(IMapper mapper)
+        public NotesController(IMapper mapper)
         {
             _mapper = mapper;
 
             MongoClient mongoClient = new MongoClient("mongodb://thebear:KgjFg713Walle@cluster0-shard-00-00-kbgve.azure.mongodb.net:27017,cluster0-shard-00-01-kbgve.azure.mongodb.net:27017,cluster0-shard-00-02-kbgve.azure.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true");
             _database = mongoClient.GetDatabase("mongodbdemo");
             _notesCollection = _database.GetCollection<NoteDto>("Note");
+
+            // Text index
+            var indexModel = new CreateIndexModel<NoteDto>(Builders<NoteDto>.IndexKeys.Combine(
+                Builders<NoteDto>.IndexKeys.Text(p => p.Header),
+                Builders<NoteDto>.IndexKeys.Text(p => p.Body )));
+            _notesCollection.Indexes.CreateOne(indexModel);
         }
         
         // GET api/values
@@ -44,11 +50,6 @@ namespace webapidemo.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<IEnumerable<NoteEntity>>> Get(string name)
         {
-            var indexModel = new CreateIndexModel<NoteDto>(Builders<NoteDto>.IndexKeys.Combine(
-                Builders<NoteDto>.IndexKeys.Text(p => p.Header),
-                Builders<NoteDto>.IndexKeys.Text(p => p.Body )));
-            _notesCollection.Indexes.CreateOne(indexModel);
-
             var notes = await _notesCollection.Find(Builders<NoteDto>.Filter.Text($"\"{name}\"")).ToListAsync();
             if (notes == null)
                 return new NoteEntity[0];
