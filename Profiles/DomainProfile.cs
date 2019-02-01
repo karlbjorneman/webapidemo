@@ -10,5 +10,7 @@ public class DomainProfile : Profile
 	{
 		CreateMap<NoteEntity, NoteDto>()
         .ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
+
+		CreateMap<PositionEntity, PositionDto>().ReverseMap();
 	}
 }

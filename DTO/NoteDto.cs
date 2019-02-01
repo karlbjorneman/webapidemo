@@ -18,5 +18,8 @@ namespace webapidemo.DTO
 
         [BsonElement("body")]
         public string Body { get; set; }
+
+        [BsonElement("position")]
+        public PositionDto Position {get; set;}
     }
 }
