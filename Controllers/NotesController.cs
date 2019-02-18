@@ -10,6 +10,9 @@ using AutoMapper;
 using webapidemo.DTO;
 using webapidemo.Entity;
 using System.Threading;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using System.IO;
 
 namespace webapidemo.Controllers
 {
@@ -34,15 +37,22 @@ namespace webapidemo.Controllers
                 Builders<NoteDto>.IndexKeys.Text(p => p.Header),
                 Builders<NoteDto>.IndexKeys.Text(p => p.Body )));
             _notesCollection.Indexes.CreateOne(indexModel);
+
+            // CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=gustaftechnotes;AccountKey=VS3VF6xc4p6pycEqfnSmtA5vvMEQF9zKlU+WtDWQ0GuVOI1gT4OPO5z3LVc5SEC2EJVoohXp/Zmtf2UhYJXwhg==;EndpointSuffix=core.windows.net");
+            // CloudBlobClient blobClient = cloudStorageAccount.CreateCloudBlobClient();
+            // CloudBlobContainer blobContainer = blobClient.GetContainerReference("gustafechnotesblobstorage");
+            // CloudBlockBlob blob = blobContainer.GetBlockBlobReference("test.jpg");
+
+            // blob.DownloadToFileAsync(@"C:\Users\Karl.Bjorneman\Downloads\test_copy.jpg", FileMode.Create).GetAwaiter().GetResult();
         }
         
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<NoteEntity>> Get()
         {
-            List<NoteDto> list = _notesCollection.Find(FilterDefinition<NoteDto>.Empty).ToList();
+            List<NoteDto> noteDtos = _notesCollection.Find(FilterDefinition<NoteDto>.Empty).ToList();
 
-            var notes = _mapper.Map<List<NoteEntity>>(list);
+            var notes = _mapper.Map<List<NoteEntity>>(noteDtos);
             return notes;
         }
 

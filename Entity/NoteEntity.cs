@@ -9,5 +9,7 @@ namespace webapidemo.Entity
         public string Body { get; set; }
 
         public PositionEntity Position {get; set;}
+
+        public string ImagePath {get; set;}
     }
 }

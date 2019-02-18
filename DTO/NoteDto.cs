@@ -21,5 +21,8 @@ namespace webapidemo.DTO
 
         [BsonElement("position")]
         public PositionDto Position {get; set;}
+
+        [BsonElement("imagePath")]
+        public string ImagePath {get; set;}
     }
 }

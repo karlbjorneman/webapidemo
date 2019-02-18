@@ -8,5 +8,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All"/>
     <PackageReference Include="MongoDB.Driver" Version="2.7.2"/>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.0.0"/>
+    <PackageReference Include="windowsazure.storageextensions" Version="1.2.0"/>
   </ItemGroup>
 </Project>
