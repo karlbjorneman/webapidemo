@@ -53,7 +53,7 @@ namespace webapidemo
             }
 
             app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
+                builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseMvc();
         }
     }
