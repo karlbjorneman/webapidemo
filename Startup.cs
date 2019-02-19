@@ -29,7 +29,14 @@ namespace webapidemo
             // {
             //     options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
             // });
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowClient",
+                    builder => builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net")
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod()
+                                    .AllowCredentials());
+            });
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .ConfigureApiBehaviorOptions(options =>
@@ -52,8 +59,8 @@ namespace webapidemo
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            // app.UseCors(builder =>
+            //     builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseMvc();
         }
     }
