@@ -25,18 +25,6 @@ namespace webapidemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddCors(options =>
-            // {
-            //     options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
-            // });
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowClient",
-                    builder => builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net")
-                                    .AllowAnyHeader()
-                                    .AllowAnyMethod()
-                                    .AllowCredentials());
-            });
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .ConfigureApiBehaviorOptions(options =>
@@ -59,8 +47,8 @@ namespace webapidemo
                 app.UseDeveloperExceptionPage();
             }
 
-            // app.UseCors(builder =>
-            //     builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            app.UseCors(builder =>
+                builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseMvc();
         }
     }
