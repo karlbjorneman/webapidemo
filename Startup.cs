@@ -10,6 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using webapidemo.Services;
 
 namespace webapidemo
 {
@@ -25,6 +28,7 @@ namespace webapidemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
             .ConfigureApiBehaviorOptions(options =>
@@ -37,6 +41,21 @@ namespace webapidemo
                 options.ClientErrorMapping[404].Link =
                     "https://httpstatuses.com/404";
             });
+            services.AddAuthentication()
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+
+                    var tokenValidatorParams = new TokenValidationParameters();
+                    tokenValidatorParams.ValidateIssuerSigningKey = true;
+                    tokenValidatorParams.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AppSettings:JwtSecret"]));
+                    tokenValidatorParams.ValidateIssuer = false;
+                    tokenValidatorParams.ValidateAudience = false;
+                    cfg.TokenValidationParameters = tokenValidatorParams;
+                });
+
+            services.AddScoped<IAuthService, AuthService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,9 +65,19 @@ namespace webapidemo
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
             app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+                builder
+                //.WithOrigins("http://localhost:3000", "https://gustaftech-notesapp.azurewebsites.net")
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+            app.UseAuthentication();
             app.UseMvc();
         }
     }
