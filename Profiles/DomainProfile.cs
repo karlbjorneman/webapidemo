@@ -12,5 +12,8 @@ public class DomainProfile : Profile
         .ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
 
 		CreateMap<PositionEntity, PositionDto>().ReverseMap();
+
+		CreateMap<ColumnEntity, ColumnDto>()
+		.ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
 	}
 }
