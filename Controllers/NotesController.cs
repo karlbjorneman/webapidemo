@@ -8,11 +8,13 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using AutoMapper;
 using webapidemo.DTO;
-using webapidemo.Entity;
 using System.Threading;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
+using webapidemo.Model;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace webapidemo.Controllers
 {
@@ -20,17 +22,14 @@ namespace webapidemo.Controllers
     [ApiController]
     public class NotesController : ControllerBase
     {
-        private IMongoDatabase _database;
         private IMongoCollection<NoteDto> _notesCollection;
         private IMapper _mapper;
 
-        public NotesController(IMapper mapper)
+        public NotesController(IMapper mapper, IConfiguration configuration, IMongoDatabase database)
         {
             _mapper = mapper;
 
-            MongoClient mongoClient = new MongoClient("mongodb://thebear:KgjFg713Walle@cluster0-shard-00-00-kbgve.azure.mongodb.net:27017,cluster0-shard-00-01-kbgve.azure.mongodb.net:27017,cluster0-shard-00-02-kbgve.azure.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true");
-            _database = mongoClient.GetDatabase("mongodbdemo");
-            _notesCollection = _database.GetCollection<NoteDto>("Note");
+            _notesCollection = database.GetCollection<NoteDto>("Note");
 
             // Text index
             var indexModel = new CreateIndexModel<NoteDto>(Builders<NoteDto>.IndexKeys.Combine(
@@ -48,39 +47,39 @@ namespace webapidemo.Controllers
         
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<NoteEntity>> Get()
+        public async Task<ActionResult<IEnumerable<Note>>> Get()
         {
-            List<NoteDto> noteDtos = _notesCollection.Find(FilterDefinition<NoteDto>.Empty).ToList();
+            List<NoteDto> noteDtos = await _notesCollection.Find(FilterDefinition<NoteDto>.Empty).ToListAsync();
 
-            var notes = _mapper.Map<List<NoteEntity>>(noteDtos);
+            var notes = _mapper.Map<List<Note>>(noteDtos);
             return notes;
         }
 
         // GET api/values/5
         [HttpGet("{name}")]
-        public async Task<ActionResult<IEnumerable<NoteEntity>>> Get(string name)
+        public async Task<ActionResult<IEnumerable<Note>>> Get(string name)
         {
             var notes = await _notesCollection.Find(Builders<NoteDto>.Filter.Text($"\"{name}\"")).ToListAsync();
             if (notes == null)
-                return new NoteEntity[0];
+                return new Note[0];
 
-            var noteEntities = _mapper.Map<List<NoteEntity>>(notes);
-            return new ActionResult<IEnumerable<NoteEntity>>(noteEntities);
+            var noteEntities = _mapper.Map<List<Note>>(notes);
+            return new ActionResult<IEnumerable<Note>>(noteEntities);
         }
 
         // POST api/values
         [HttpPost]
         [AcceptVerbs("POST", "OPTIONS")]
-        public void Post([FromBody] NoteEntity value)
+        public async Task Post([FromBody] Note value)
         {
             var note = _mapper.Map<NoteDto>(value);
-            _notesCollection.InsertOne(note);
+            await _notesCollection.InsertOneAsync(note);
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
         [AcceptVerbs("PUT", "OPTIONS")]
-        public async Task Put(string id, [FromBody] NoteEntity value)
+        public async Task Put(string id, [FromBody] Note value)
         {
             var note = _mapper.Map<NoteDto>(value);
 

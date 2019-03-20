@@ -13,6 +13,8 @@ using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using webapidemo.Services;
+using webapidemo.Model;
+using MongoDB.Driver;
 
 namespace webapidemo
 {
@@ -28,6 +30,12 @@ namespace webapidemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mongoDbConnectionstring = Configuration.GetValue<string>("mongodb:connectionstring");
+
+            MongoClient mongoClient = new MongoClient(mongoDbConnectionstring);
+            var database = mongoClient.GetDatabase("mongodbdemo");
+            services.AddSingleton<IMongoDatabase>(database);
+
             services.AddCors();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
@@ -49,7 +57,7 @@ namespace webapidemo
 
                     var tokenValidatorParams = new TokenValidationParameters();
                     tokenValidatorParams.ValidateIssuerSigningKey = true;
-                    tokenValidatorParams.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AppSettings:JwtSecret"]));
+                    tokenValidatorParams.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwt:secret"]));
                     tokenValidatorParams.ValidateIssuer = false;
                     tokenValidatorParams.ValidateAudience = false;
                     cfg.TokenValidationParameters = tokenValidatorParams;

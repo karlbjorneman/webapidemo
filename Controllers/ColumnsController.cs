@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using webapidemo.DTO;
-using webapidemo.Entity;
+using webapidemo.Model;
 
 namespace webapidemo.Controllers
 {
@@ -11,30 +12,27 @@ namespace webapidemo.Controllers
     [ApiController]
     public class ColumnsController : ControllerBase
     {
-        private IMongoDatabase _database;
-        private IMongoCollection<ColumnDto> _notesCollection;
+        private IMongoCollection<ColumnDto> _columnsCollection;
         private IMapper _mapper;
 
-        public ColumnsController(IMapper mapper)
+        public ColumnsController(IMapper mapper, IMongoDatabase database)
         {
             _mapper = mapper;
 
-            MongoClient mongoClient = new MongoClient("mongodb://thebear:KgjFg713Walle@cluster0-shard-00-00-kbgve.azure.mongodb.net:27017,cluster0-shard-00-01-kbgve.azure.mongodb.net:27017,cluster0-shard-00-02-kbgve.azure.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true");
-            _database = mongoClient.GetDatabase("mongodbdemo");
-            _notesCollection = _database.GetCollection<ColumnDto>("Column");
+            _columnsCollection = database.GetCollection<ColumnDto>("Column");
 
             // Text index
             var indexModel = new CreateIndexModel<ColumnDto>(Builders<ColumnDto>.IndexKeys.Combine(
                 Builders<ColumnDto>.IndexKeys.Text(p => p.ColumnId)));
-            _notesCollection.Indexes.CreateOne(indexModel);
+            _columnsCollection.Indexes.CreateOne(indexModel);
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ColumnEntity>> Get()
+        public async Task<ActionResult<IEnumerable<Column>>> Get()
         {
-            List<ColumnDto> columnDtos = _notesCollection.Find(FilterDefinition<ColumnDto>.Empty).ToList();
+            List<ColumnDto> columnDtos = await _columnsCollection.Find(FilterDefinition<ColumnDto>.Empty).ToListAsync();
 
-            var columns = _mapper.Map<List<ColumnEntity>>(columnDtos);
+            var columns = _mapper.Map<List<Column>>(columnDtos);
             return columns;
         }
     }

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace webapidemo.Entity
+namespace webapidemo.Model
 {
-    public class ColumnEntity
+    public class Column
     {
         public string Id {get; set;}
         public string ColumnId {get; set;}

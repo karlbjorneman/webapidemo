@@ -34,18 +34,19 @@ namespace webapidemo.Controllers
         {
             try
             {
-                //SimpleLogger.Log("userView = " + userView.tokenId);
                 var payload = GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
                 var user = await _authService.Authenticate(payload);
                 SimpleLogger.Log(payload.ExpirationTimeSeconds.ToString());
 
+                var jwtSecret = _configuration["jwt:secret"];
+
                 var claims = new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(_configuration["AppSettings:JwtEmailEncryption"],user.email)),
+                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtSecret, user.email)),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
-                var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AppSettings.appSettings.JwtSecret));
+                var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(String.Empty,
@@ -53,6 +54,7 @@ namespace webapidemo.Controllers
                   claims,
                   expires: DateTime.Now.AddSeconds(55*60),
                   signingCredentials: creds);
+                  
                 return Ok(new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token)

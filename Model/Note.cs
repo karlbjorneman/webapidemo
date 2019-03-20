@@ -1,6 +1,6 @@
-namespace webapidemo.Entity
+namespace webapidemo.Model
 {
-    public class NoteEntity
+    public class Note
     {
         public string Id { get; set; }
         
@@ -8,7 +8,7 @@ namespace webapidemo.Entity
 
         public string Body { get; set; }
 
-        public PositionEntity Position {get; set;}
+        public Position Position {get; set;}
 
         public string ImagePath {get; set;}
     }

@@ -2,18 +2,18 @@ using AutoMapper;
 using MongoDB.Bson;
 using webapidemo;
 using webapidemo.DTO;
-using webapidemo.Entity;
+using webapidemo.Model;
 
 public class DomainProfile : Profile
 {
 	public DomainProfile()
 	{
-		CreateMap<NoteEntity, NoteDto>()
+		CreateMap<Note, NoteDto>()
         .ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
 
-		CreateMap<PositionEntity, PositionDto>().ReverseMap();
+		CreateMap<Position, PositionDto>().ReverseMap();
 
-		CreateMap<ColumnEntity, ColumnDto>()
+		CreateMap<Column, ColumnDto>()
 		.ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
 	}
 }
