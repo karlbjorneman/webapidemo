@@ -5,6 +5,6 @@ namespace webapidemo.Services
 {
     public interface IAuthService
     {
-        Task<User> Authenticate(Google.Apis.Auth.GoogleJsonWebSignature.Payload payload);
+        Task<UserDto> Authenticate(Google.Apis.Auth.GoogleJsonWebSignature.Payload payload);
     }
 }

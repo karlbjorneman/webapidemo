@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using webapidemo.DTO;
 using webapidemo.Helpers;
+using webapidemo.Model;
 using webapidemo.Services;
 
 namespace webapidemo.Controllers
@@ -34,7 +34,7 @@ namespace webapidemo.Controllers
         {
             try
             {
-                var payload = GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
+                var payload = await GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings());
                 var user = await _authService.Authenticate(payload);
                 SimpleLogger.Log(payload.ExpirationTimeSeconds.ToString());
 
@@ -42,7 +42,7 @@ namespace webapidemo.Controllers
 
                 var claims = new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtSecret, user.email)),
+                    new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtSecret, user.Email)),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 

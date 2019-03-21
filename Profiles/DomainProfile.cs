@@ -15,5 +15,7 @@ public class DomainProfile : Profile
 
 		CreateMap<Column, ColumnDto>()
 		.ForMember(dest => dest.Id, options => options.MapFrom(src => new ObjectId(src.Id))).ReverseMap();
+
+		CreateMap<Google.Apis.Auth.GoogleJsonWebSignature.Payload, UserDto>();
 	}
 }

@@ -28,7 +28,7 @@ namespace webapidemo.Controllers
         private IMongoCollection<NoteDto> _notesCollection;
         private IMapper _mapper;
 
-        public NotesController(IMapper mapper, IConfiguration configuration, IMongoDatabase database)
+        public NotesController(IMapper mapper, IMongoDatabase database)
         {
             _mapper = mapper;
 
