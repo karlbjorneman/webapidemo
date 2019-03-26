@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using webapidemo.DTO;
+using webapidemo.Extensions;
 using webapidemo.Model;
 
 namespace webapidemo.Controllers
@@ -33,10 +34,11 @@ namespace webapidemo.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Column>>> Get()
         {
-            List<ColumnDto> columnDtos = await _columnsCollection.Find(FilterDefinition<ColumnDto>.Empty).ToListAsync();
+            var userId = HttpContext.User.GetUserId();
+            List<ColumnDto> columnDtos = await _columnsCollection.Find(column => column.UserId == userId).ToListAsync();
 
             var columns = _mapper.Map<List<Column>>(columnDtos);
             return columns;
-        }
+        }      
     }
 }

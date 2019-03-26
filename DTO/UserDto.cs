@@ -5,9 +5,10 @@ namespace webapidemo.DTO
 {
     public class UserDto
     {
-        [BsonId]
+        [BsonId()]
         [BsonIgnoreIfDefault]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
         [BsonElement("email")]
         public string Email {get; set;}

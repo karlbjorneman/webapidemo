@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using webapidemo.Extensions;
 
 namespace webapidemo.Controllers
 {
@@ -52,7 +53,8 @@ namespace webapidemo.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Note>>> Get()
         {
-            List<NoteDto> noteDtos = await _notesCollection.Find(FilterDefinition<NoteDto>.Empty).ToListAsync();
+            var userId = HttpContext.User.GetUserId();
+            List<NoteDto> noteDtos = await _notesCollection.Find(note => note.UserId == userId).ToListAsync();
 
             var notes = _mapper.Map<List<Note>>(noteDtos);
             return notes;

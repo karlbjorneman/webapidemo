@@ -44,6 +44,7 @@ namespace webapidemo.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, Security.Encrypt(jwtSecret, user.Email)),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("userid", user.Id)
                 };
 
                 var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret));

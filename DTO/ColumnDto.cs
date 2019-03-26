@@ -15,5 +15,9 @@ namespace webapidemo.DTO
 
         [BsonElement("notes")]
         public ObjectId[] NoteIds {get; set;}
+
+        [BsonElement("userId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId {get; set;}
     }
 }
