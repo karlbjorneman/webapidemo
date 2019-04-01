@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using webapidemo.DTO;
 using webapidemo.Extensions;
@@ -39,6 +40,23 @@ namespace webapidemo.Controllers
 
             var columns = _mapper.Map<List<Column>>(columnDtos);
             return columns;
-        }      
+        }     
+
+        // PUT api/values/5
+        [HttpPut("{columnId}/notes")]
+        [AcceptVerbs("PUT", "OPTIONS")]
+        public async Task Put(string columnId, [FromBody] List<string> noteIds)
+        {
+            List<ObjectId> objectIds = new List<ObjectId>();
+            foreach (string value in noteIds)
+            {
+                objectIds.Add(new ObjectId(value));
+            }
+
+            var userId = HttpContext.User.GetUserId();
+
+            var updateDef = new UpdateDefinitionBuilder<ColumnDto>().Set(x => x.NoteIds, objectIds.ToArray());
+            await _columnsCollection.UpdateOneAsync(col => col.ColumnId == columnId && col.UserId == userId, updateDef);
+        }
     }
 }
