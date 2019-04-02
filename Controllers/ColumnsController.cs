@@ -58,5 +58,32 @@ namespace webapidemo.Controllers
             var updateDef = new UpdateDefinitionBuilder<ColumnDto>().Set(x => x.NoteIds, objectIds.ToArray());
             await _columnsCollection.UpdateOneAsync(col => col.ColumnId == columnId && col.UserId == userId, updateDef);
         }
+
+        
+        // PUT api/values/5
+        [HttpPut("{sourceColumnId}/{destinationColumnId}/notes")]
+        [AcceptVerbs("PUT", "OPTIONS")]
+        public async Task Put(string sourceColumnId, string destinationColumnId, [FromBody] UpdateColumn update)
+        {
+            var userId = HttpContext.User.GetUserId();
+
+            // Move note inside column
+            if (sourceColumnId == destinationColumnId)
+            {
+                List<ObjectId> sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
+                await UpdateColumn(sourceColumnId, sourceIds, userId);
+                return;
+            }
+
+            // Move to another column
+            List<ObjectId> destinationIds = _mapper.Map<List<ObjectId>>(update.DestinationNotes);
+            await UpdateColumn(destinationColumnId, destinationIds, userId);
+        }
+
+        private async Task UpdateColumn(string sourceColumnId, List<ObjectId> sourceIds, string userId)
+        {
+            var updateDef = new UpdateDefinitionBuilder<ColumnDto>().Set(x => x.NoteIds, sourceIds.ToArray());
+            await _columnsCollection.UpdateOneAsync(col => col.ColumnId == sourceColumnId && col.UserId == userId, updateDef);
+        }
     }
 }
