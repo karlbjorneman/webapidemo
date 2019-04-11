@@ -67,15 +67,18 @@ namespace webapidemo.Controllers
         {
             var userId = HttpContext.User.GetUserId();
 
+            List<ObjectId> sourceIds;
             // Move note inside column
             if (sourceColumnId == destinationColumnId)
             {
-                List<ObjectId> sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
+                sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
                 await UpdateColumn(sourceColumnId, sourceIds, userId);
                 return;
             }
 
             // Move to another column
+            sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
+            await UpdateColumn(sourceColumnId, sourceIds, userId);
             List<ObjectId> destinationIds = _mapper.Map<List<ObjectId>>(update.DestinationNotes);
             await UpdateColumn(destinationColumnId, destinationIds, userId);
         }
