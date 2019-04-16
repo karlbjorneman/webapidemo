@@ -89,7 +89,12 @@ namespace webapidemo.Controllers
             var note = _mapper.Map<NoteDto>(value);
 
             ObjectId objectId = new ObjectId(id);
-            await _notesCollection.ReplaceOneAsync(f => f.Id == objectId, note);
+
+            var updateDef = new UpdateDefinitionBuilder<NoteDto>()
+                                .Set(x => x.Body, note.Body)
+                                .Set(x => x.Header, note.Header)
+                                .Set(x => x.ImagePath, note.ImagePath);
+            await _notesCollection.UpdateOneAsync(f => f.Id == objectId, updateDef);
         }
 
         // DELETE api/values/5

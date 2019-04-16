@@ -11,5 +11,7 @@ namespace webapidemo.Model
         public Position Position {get; set;}
 
         public string ImagePath {get; set;}
+
+        public string UserId {get; set;}
     }
 }
