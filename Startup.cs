@@ -15,6 +15,7 @@ using System.Text;
 using webapidemo.Services;
 using webapidemo.Model;
 using MongoDB.Driver;
+using webapidemo.Repositories;
 
 namespace webapidemo
 {
@@ -35,6 +36,8 @@ namespace webapidemo
             MongoClient mongoClient = new MongoClient(mongoDbConnectionstring);
             var database = mongoClient.GetDatabase("mongodbdemo");
             services.AddSingleton<IMongoDatabase>(database);
+
+            services.AddScoped<IColumnRepository, ColumnRepository>();
 
             services.AddCors();
             services.AddAutoMapper();

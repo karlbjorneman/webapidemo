@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using webapidemo.Extensions;
+using webapidemo.Repositories;
 
 namespace webapidemo.Controllers
 {
@@ -28,10 +29,12 @@ namespace webapidemo.Controllers
     {
         private IMongoCollection<NoteDto> _notesCollection;
         private IMapper _mapper;
+        private IColumnRepository _columnRepository;
 
-        public NotesController(IMapper mapper, IMongoDatabase database)
+        public NotesController(IMapper mapper, IMongoDatabase database, IColumnRepository columnRepository)
         {
             _mapper = mapper;
+            _columnRepository = columnRepository;
 
             _notesCollection = database.GetCollection<NoteDto>("Note");
 
@@ -75,10 +78,33 @@ namespace webapidemo.Controllers
         // POST api/values
         [HttpPost]
         [AcceptVerbs("POST", "OPTIONS")]
-        public async Task Post([FromBody] Note value)
+        public async Task<ActionResult<Note>> Post([FromBody] Note value)
         {
+            var userId = HttpContext.User.GetUserId();
+
+            int maxCount = 0;
+            ColumnDto maxCountColumn = null;
+
+            IList<ColumnDto> columnDtos = await _columnRepository.Get(userId);
+            foreach(ColumnDto columnDto in columnDtos)
+            {
+                if (columnDto.NoteIds.Length > maxCount)
+                {
+                    maxCount = columnDto.NoteIds.Length;
+                    maxCountColumn = columnDto;
+                }
+            }
+
             var note = _mapper.Map<NoteDto>(value);
+            note.Position = new PositionDto() {Column = maxCountColumn.ColumnId};
+            note.UserId = userId;
             await _notesCollection.InsertOneAsync(note);
+
+            var noteIds = maxCountColumn.NoteIds.ToList();
+            noteIds.Insert(0, note.Id);
+            await _columnRepository.Update(userId, maxCountColumn.ColumnId, noteIds);
+
+            return new ActionResult<Note>(_mapper.Map<Note>(note));
         }
 
         // PUT api/values/5

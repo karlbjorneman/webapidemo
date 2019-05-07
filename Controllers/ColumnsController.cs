@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,6 +10,7 @@ using MongoDB.Driver;
 using webapidemo.DTO;
 using webapidemo.Extensions;
 using webapidemo.Model;
+using webapidemo.Repositories;
 
 namespace webapidemo.Controllers
 {
@@ -17,26 +19,21 @@ namespace webapidemo.Controllers
     [ApiController]
     public class ColumnsController : ControllerBase
     {
-        private IMongoCollection<ColumnDto> _columnsCollection;
         private IMapper _mapper;
+        private IColumnRepository _columnRepository;
 
-        public ColumnsController(IMapper mapper, IMongoDatabase database)
+        public ColumnsController(IColumnRepository columnRepository, IMapper mapper)
         {
             _mapper = mapper;
-
-            _columnsCollection = database.GetCollection<ColumnDto>("Column");
-
-            // Text index
-            var indexModel = new CreateIndexModel<ColumnDto>(Builders<ColumnDto>.IndexKeys.Combine(
-                Builders<ColumnDto>.IndexKeys.Text(p => p.ColumnId)));
-            _columnsCollection.Indexes.CreateOne(indexModel);
+            _columnRepository = columnRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Column>>> Get()
         {
             var userId = HttpContext.User.GetUserId();
-            List<ColumnDto> columnDtos = await _columnsCollection.Find(column => column.UserId == userId).ToListAsync();
+            
+            var columnDtos = await _columnRepository.Get(userId);
 
             var columns = _mapper.Map<List<Column>>(columnDtos);
             return columns;
@@ -55,8 +52,7 @@ namespace webapidemo.Controllers
 
             var userId = HttpContext.User.GetUserId();
 
-            var updateDef = new UpdateDefinitionBuilder<ColumnDto>().Set(x => x.NoteIds, objectIds.ToArray());
-            await _columnsCollection.UpdateOneAsync(col => col.ColumnId == columnId && col.UserId == userId, updateDef);
+            await _columnRepository.Update(userId, columnId, objectIds);
         }
 
         
@@ -72,21 +68,15 @@ namespace webapidemo.Controllers
             if (sourceColumnId == destinationColumnId)
             {
                 sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
-                await UpdateColumn(sourceColumnId, sourceIds, userId);
+                await _columnRepository.Update(userId, sourceColumnId, sourceIds);
                 return;
             }
 
             // Move to another column
             sourceIds = _mapper.Map<List<ObjectId>>(update.SourceNotes);
-            await UpdateColumn(sourceColumnId, sourceIds, userId);
+            await _columnRepository.Update(userId, sourceColumnId, sourceIds);
             List<ObjectId> destinationIds = _mapper.Map<List<ObjectId>>(update.DestinationNotes);
-            await UpdateColumn(destinationColumnId, destinationIds, userId);
-        }
-
-        private async Task UpdateColumn(string sourceColumnId, List<ObjectId> sourceIds, string userId)
-        {
-            var updateDef = new UpdateDefinitionBuilder<ColumnDto>().Set(x => x.NoteIds, sourceIds.ToArray());
-            await _columnsCollection.UpdateOneAsync(col => col.ColumnId == sourceColumnId && col.UserId == userId, updateDef);
+            await _columnRepository.Update(userId, destinationColumnId, destinationIds);
         }
     }
 }
