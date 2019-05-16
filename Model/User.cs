@@ -13,5 +13,7 @@ namespace webapidemo.Model
         public string Subject {get; set;}
 
         public string Issuer {get; set;}
+
+        public string GooglePhotoAlbumId {get; set;}
     }
 }

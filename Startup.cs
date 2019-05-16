@@ -36,8 +36,8 @@ namespace webapidemo
             MongoClient mongoClient = new MongoClient(mongoDbConnectionstring);
             var database = mongoClient.GetDatabase("mongodbdemo");
             services.AddSingleton<IMongoDatabase>(database);
-
             services.AddScoped<IColumnRepository, ColumnRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddCors();
             services.AddAutoMapper();

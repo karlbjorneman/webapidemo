@@ -27,5 +27,8 @@ namespace webapidemo.DTO
 
         [BsonElement("issuer")]
         public string Issuer {get; set;}
+
+        [BsonElement("googlePhotoAlbumId")]
+        public string GooglePhotoAlbumId {get; set;}
     }
 }

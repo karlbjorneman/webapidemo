@@ -3,12 +3,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using webapidemo.DTO;
 using webapidemo.Helpers;
 using webapidemo.Model;
 using webapidemo.Services;
@@ -21,11 +23,13 @@ namespace webapidemo.Controllers
     {
         private IAuthService _authService;
         private IConfiguration _configuration;
+        private IMapper _mapper;
 
-        public AuthController(IAuthService authService, IConfiguration configuration)
+        public AuthController(IAuthService authService, IConfiguration configuration, IMapper mapper)
         {
             _authService = authService;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -35,7 +39,9 @@ namespace webapidemo.Controllers
             try
             {
                 var payload = await GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings());
-                var user = await _authService.Authenticate(payload);
+                UserDto recievedUser = _mapper.Map<UserDto>(payload);
+                var user = await _authService.Authenticate(recievedUser, userView.googleAccessToken);
+
                 SimpleLogger.Log(payload.ExpirationTimeSeconds.ToString());
 
                 var jwtSecret = _configuration["jwt:secret"];
@@ -58,7 +64,8 @@ namespace webapidemo.Controllers
                   
                 return Ok(new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token)
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    user
                 });
             }
             catch (Exception ex)
