@@ -14,6 +14,12 @@ namespace webapidemo.Repositories
             _usersCollection = database.GetCollection<UserDto>("User");
         }
 
+        public async Task<UserDto> Get(string userId)
+        {
+            UserDto user = (await _usersCollection.FindAsync(u => u.Id == userId)).FirstOrDefault();
+            return user;
+        }
+
         public async Task<UserDto> GetOrCreate(UserDto user)
         {
             var existingUser = (await _usersCollection.FindAsync(u => u.Email == user.Email)).FirstOrDefault();

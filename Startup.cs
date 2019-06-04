@@ -38,6 +38,7 @@ namespace webapidemo
             services.AddSingleton<IMongoDatabase>(database);
             services.AddScoped<IColumnRepository, ColumnRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPhotoService, PhotoService>(); 
 
             services.AddCors();
             services.AddAutoMapper();

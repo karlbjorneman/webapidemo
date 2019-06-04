@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using webapidemo.Extensions;
 using webapidemo.Repositories;
+using Microsoft.AspNetCore.Http;
+using webapidemo.Services;
 
 namespace webapidemo.Controllers
 {
@@ -30,11 +32,13 @@ namespace webapidemo.Controllers
         private IMongoCollection<NoteDto> _notesCollection;
         private IMapper _mapper;
         private IColumnRepository _columnRepository;
+        private IPhotoService _photoService;
 
-        public NotesController(IMapper mapper, IMongoDatabase database, IColumnRepository columnRepository)
+        public NotesController(IMapper mapper, IMongoDatabase database, IColumnRepository columnRepository, IPhotoService photoService)
         {
             _mapper = mapper;
             _columnRepository = columnRepository;
+            _photoService = photoService;
 
             _notesCollection = database.GetCollection<NoteDto>("Note");
 
@@ -75,34 +79,31 @@ namespace webapidemo.Controllers
             return new ActionResult<IEnumerable<Note>>(noteEntities);
         }
 
-        // POST api/values
         [HttpPost]
         [AcceptVerbs("POST", "OPTIONS")]
-        public async Task<ActionResult<Note>> Post([FromBody] Note value)
+        public async Task<ActionResult<Note>> Post(IFormCollection form)
         {
             var userId = HttpContext.User.GetUserId();
 
-            int maxCount = 0;
-            ColumnDto maxCountColumn = null;
+            ColumnDto columnToUpdate = await ColumnToUpdate(userId);
 
-            IList<ColumnDto> columnDtos = await _columnRepository.Get(userId);
-            foreach(ColumnDto columnDto in columnDtos)
+            var note = new NoteDto {Header = form["header"], Body = form["body"]};
+            string accessToken = form["accessToken"];
+            note.Position = new PositionDto() {Column = columnToUpdate.ColumnId};
+            note.UserId = userId;
+
+            IFormFile imageFile = form.Files.FirstOrDefault();
+            if (imageFile != null)
             {
-                if (columnDto.NoteIds.Length > maxCount)
-                {
-                    maxCount = columnDto.NoteIds.Length;
-                    maxCountColumn = columnDto;
-                }
+                await _photoService.AddPhoto(accessToken, userId, imageFile);
+                note.ImagePath = imageFile.FileName;
             }
 
-            var note = _mapper.Map<NoteDto>(value);
-            note.Position = new PositionDto() {Column = maxCountColumn.ColumnId};
-            note.UserId = userId;
             await _notesCollection.InsertOneAsync(note);
 
-            var noteIds = maxCountColumn.NoteIds.ToList();
+            var noteIds = columnToUpdate.NoteIds.ToList();
             noteIds.Insert(0, note.Id);
-            await _columnRepository.Update(userId, maxCountColumn.ColumnId, noteIds);
+            await _columnRepository.Update(userId, columnToUpdate.ColumnId, noteIds);
 
             return new ActionResult<Note>(_mapper.Map<Note>(note));
         }
@@ -127,6 +128,24 @@ namespace webapidemo.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        private async Task<ColumnDto> ColumnToUpdate(string userId)
+        {
+            int minCount = Int32.MaxValue;
+            ColumnDto minCountColumn = null;
+
+            IList<ColumnDto> columnDtos = await _columnRepository.Get(userId);
+            foreach(ColumnDto columnDto in columnDtos)
+            {
+                if (columnDto.NoteIds.Length < minCount)
+                {
+                    minCount = columnDto.NoteIds.Length;
+                    minCountColumn = columnDto;
+                }
+            }
+
+            return minCountColumn;
         }
     }
 }
