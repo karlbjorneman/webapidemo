@@ -47,13 +47,6 @@ namespace webapidemo.Controllers
                 Builders<NoteDto>.IndexKeys.Text(p => p.Header),
                 Builders<NoteDto>.IndexKeys.Text(p => p.Body )));
             _notesCollection.Indexes.CreateOne(indexModel);
-
-            // CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=gustaftechnotes;AccountKey=VS3VF6xc4p6pycEqfnSmtA5vvMEQF9zKlU+WtDWQ0GuVOI1gT4OPO5z3LVc5SEC2EJVoohXp/Zmtf2UhYJXwhg==;EndpointSuffix=core.windows.net");
-            // CloudBlobClient blobClient = cloudStorageAccount.CreateCloudBlobClient();
-            // CloudBlobContainer blobContainer = blobClient.GetContainerReference("gustafechnotesblobstorage");
-            // CloudBlockBlob blob = blobContainer.GetBlockBlobReference("test.jpg");
-
-            // blob.DownloadToFileAsync(@"C:\Users\Karl.Bjorneman\Downloads\test_copy.jpg", FileMode.Create).GetAwaiter().GetResult();
         }
         
         // GET api/values
