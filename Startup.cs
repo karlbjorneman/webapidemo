@@ -31,7 +31,7 @@ namespace webapidemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var mongoDbConnectionstring = Configuration.GetValue<string>("mongodb:connectionstring");
+            var mongoDbConnectionstring = Configuration.GetValue<string>("mongodb__connectionstring");
 
             MongoClient mongoClient = new MongoClient(mongoDbConnectionstring);
             var database = mongoClient.GetDatabase("mongodbdemo");
@@ -61,7 +61,7 @@ namespace webapidemo
 
                     var tokenValidatorParams = new TokenValidationParameters();
                     tokenValidatorParams.ValidateIssuerSigningKey = true;
-                    tokenValidatorParams.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwt:secret"]));
+                    tokenValidatorParams.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwt__secret"]));
                     tokenValidatorParams.ValidateIssuer = false;
                     tokenValidatorParams.ValidateAudience = false;
                     cfg.TokenValidationParameters = tokenValidatorParams;

@@ -44,7 +44,7 @@ namespace webapidemo.Controllers
 
                 SimpleLogger.Log(payload.ExpirationTimeSeconds.ToString());
 
-                var jwtSecret = _configuration["jwt:secret"];
+                var jwtSecret = _configuration["jwt__secret"];
 
                 var claims = new[]
                 {
