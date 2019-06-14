@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using webapidemo.DTO;
@@ -13,10 +15,12 @@ namespace webapidemo.Services
         private const string _photoAlbumName = "Notes_5d0508a2-4222-40dd-8631-583706b9b627";
 
         private IUserRepository _userRepository;
+        private IMapper _mapper;
 
-        public PhotoService(IUserRepository userRepository)
+        public PhotoService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         public async Task AddAlbum(string accessToken, UserDto foundUser)
@@ -41,7 +45,7 @@ namespace webapidemo.Services
             }
         }
 
-        public async Task AddPhoto(string accessToken, string userId, IFormFile imageFile)
+        public async Task<NewPhoto> AddPhoto(string accessToken, string userId, IFormFile imageFile)
         {
             using (HttpClient httpClient = new HttpClient())
             {
@@ -87,6 +91,15 @@ namespace webapidemo.Services
 
                         HttpResponseMessage response = await httpClient.SendAsync(request);
                         string result = await response.Content.ReadAsStringAsync();
+
+                        var newMediaItems = JsonConvert.DeserializeObject<NewMediaItems>(result);
+
+                        var newMediaItem = newMediaItems.NewMediaItemResults.FirstOrDefault();
+                        
+                        var photoData = _mapper.Map<NewPhoto>(newMediaItem.MediaItem);
+
+                        return photoData;
+                        
                 }
             }
         }

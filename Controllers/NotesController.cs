@@ -88,8 +88,8 @@ namespace webapidemo.Controllers
             IFormFile imageFile = form.Files.FirstOrDefault();
             if (imageFile != null)
             {
-                await _photoService.AddPhoto(accessToken, userId, imageFile);
-                note.ImagePath = imageFile.FileName;
+                NewPhoto uploadedPhoto = await _photoService.AddPhoto(accessToken, userId, imageFile);
+                note.ImagePath = uploadedPhoto.Id;
             }
 
             await _notesCollection.InsertOneAsync(note);
