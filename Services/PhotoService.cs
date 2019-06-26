@@ -67,12 +67,6 @@ namespace webapidemo.Services
                     }
                 }
 
-                if (uploadToken == null)
-                {
-                    // TODO: Something went wrong.
-                    return;
-                }
-
                 UserDto user = await _userRepository.Get(userId);
 
                 MediaItems mediaItems = new MediaItems();
