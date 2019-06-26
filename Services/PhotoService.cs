@@ -69,7 +69,7 @@ namespace webapidemo.Services
 
                 UserDto user = await _userRepository.Get(userId);
 
-                MediaItems mediaItems = new MediaItems();
+                AddMediaItems mediaItems = new AddMediaItems();
                 mediaItems.AlbumId = user.GooglePhotoAlbumId;
                 MediaItem mediaItem = new MediaItem();
                 mediaItem.SimpleMediaItem = new SimpleMediaItem {UploadToken = uploadToken};
@@ -86,7 +86,7 @@ namespace webapidemo.Services
                         HttpResponseMessage response = await httpClient.SendAsync(request);
                         string result = await response.Content.ReadAsStringAsync();
 
-                        var newMediaItems = JsonConvert.DeserializeObject<NewMediaItems>(result);
+                        var newMediaItems = JsonConvert.DeserializeObject<MediaItems>(result);
 
                         var newMediaItem = newMediaItems.NewMediaItemResults.FirstOrDefault();
                         
