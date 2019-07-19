@@ -63,7 +63,7 @@ namespace webapidemo.Controllers
                     continue;
 
                 GetPhoto mediaItem = await _photoService.GetPhoto(googleAccessToken, noteDto.ImagePath);
-                noteDto.ImageUrl = $"{mediaItem.BaseUrl}=w2048-h1024" ;
+                noteDto.ImageUrl = $"{mediaItem.BaseUrl}=w2048-h1024";
             }
 
             var notes = _mapper.Map<List<Note>>(noteDtos);
@@ -100,6 +100,9 @@ namespace webapidemo.Controllers
             {
                 NewPhoto uploadedPhoto = await _photoService.AddPhoto(accessToken, userId, imageFile);
                 note.ImagePath = uploadedPhoto.Id;
+
+                var processedPhoto = await _photoService.GetPhoto(accessToken, uploadedPhoto.Id);
+                note.ImageUrl =  $"{processedPhoto.BaseUrl}=w2048-h1024";
             }
 
             await _notesCollection.InsertOneAsync(note);

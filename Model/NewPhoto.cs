@@ -6,6 +6,6 @@ namespace webapidemo.Model
     {
         public string Id { get; set; }
 
-        public Uri ProductUrl { get; set; }
+        public Uri BaseUrl { get; set; }
     }
 }
