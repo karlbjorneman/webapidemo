@@ -43,24 +43,24 @@ namespace webapidemo.Model
         public MediaMetadata MediaMetadata { get; set; }
     }
 
-    public class MediaMetadata
-    {
-        [JsonProperty("width")]
-        public string Width { get; set; }
+    // public class MediaMetadata
+    // {
+    //     [JsonProperty("width")]
+    //     public string Width { get; set; }
 
-        [JsonProperty("height")]
-        public string Height { get; set; }
+    //     [JsonProperty("height")]
+    //     public string Height { get; set; }
 
-        [JsonProperty("creationTime")]
-        public string CreationTime { get; set; }
+    //     [JsonProperty("creationTime")]
+    //     public string CreationTime { get; set; }
 
-        [JsonProperty("photo")]
-        public Photo Photo { get; set; }
-    }
+    //     [JsonProperty("photo")]
+    //     public Photo Photo { get; set; }
+    // }
 
-    public class Photo
-    {
-    }
+    // public class Photo
+    // {
+    // }
 
     public class Status
     {

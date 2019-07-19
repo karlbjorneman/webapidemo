@@ -9,5 +9,7 @@ namespace webapidemo.Services
     {
          Task AddAlbum(string accessToken, UserDto foundUser);
          Task<NewPhoto> AddPhoto(string accessToken, string userId, IFormFile imageFile);
+
+         Task<GetPhoto> GetPhoto(string accessToken, string mediaItemId);
     }
 }

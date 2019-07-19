@@ -56,6 +56,16 @@ namespace webapidemo.Controllers
             var userId = HttpContext.User.GetUserId();
             List<NoteDto> noteDtos = await _notesCollection.Find(note => note.UserId == userId).ToListAsync();
 
+            string googleAccessToken = HttpContext.Request.Headers["googleAccessToken"];
+            foreach(NoteDto noteDto in noteDtos)
+            {
+                if (string.IsNullOrEmpty(noteDto.ImagePath))
+                    continue;
+
+                GetPhoto mediaItem = await _photoService.GetPhoto(googleAccessToken, noteDto.ImagePath);
+                noteDto.ImageUrl = $"{mediaItem.BaseUrl}=w2048-h1024" ;
+            }
+
             var notes = _mapper.Map<List<Note>>(noteDtos);
             return notes;
         }

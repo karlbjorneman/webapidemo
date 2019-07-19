@@ -25,6 +25,8 @@ namespace webapidemo.DTO
         [BsonElement("imagePath")]
         public string ImagePath {get; set;}
 
+        public string ImageUrl {get; set;}
+
         [BsonElement("userId")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string UserId {get; set;}

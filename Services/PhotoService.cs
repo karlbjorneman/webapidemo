@@ -97,5 +97,22 @@ namespace webapidemo.Services
                 }
             }
         }
+
+        public async Task<GetPhoto> GetPhoto(string accessToken, string mediaItemId)
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"https://photoslibrary.googleapis.com/v1/mediaItems/{mediaItemId}"))
+                {
+                    request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+                    HttpResponseMessage response = await httpClient.SendAsync(request);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var mediaItem = JsonConvert.DeserializeObject<GetPhoto>(result);
+
+                    return mediaItem;
+                }
+            }
+        }
     }
 }
