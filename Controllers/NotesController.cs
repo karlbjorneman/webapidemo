@@ -87,7 +87,6 @@ namespace webapidemo.Controllers
         public async Task<ActionResult<Note>> Post(IFormCollection form)
         {
             var userId = HttpContext.User.GetUserId();
-
             ColumnDto columnToUpdate = await ColumnToUpdate(userId);
 
             var note = new NoteDto {Header = form["header"], Body = form["body"]};
@@ -128,6 +127,48 @@ namespace webapidemo.Controllers
                                 .Set(x => x.Header, note.Header)
                                 .Set(x => x.ImagePath, note.ImagePath);
             await _notesCollection.UpdateOneAsync(f => f.Id == objectId, updateDef);
+        }
+
+        
+        [HttpPut("image/{id}")]
+        [AcceptVerbs("PUT", "OPTIONS")]
+        public async Task<ActionResult<Note>> PutImage(string id, IFormCollection form)
+        {
+            ObjectId objectId = new ObjectId(id);
+
+            string userId = HttpContext.User.GetUserId();
+            ColumnDto columnToUpdate = await ColumnToUpdate(userId);
+
+            var note = new NoteDto 
+            {
+                Header = form["header"], 
+                Body = form["body"], 
+                Id = objectId,
+                UserId = userId,
+                Position = new PositionDto {Column = form["position"]} 
+            };
+            string accessToken = form["accessToken"];
+
+            IFormFile imageFile = form.Files.FirstOrDefault();
+            if (imageFile != null)
+            {
+                NewPhoto uploadedPhoto = await _photoService.AddPhoto(accessToken, userId, imageFile);
+                note.ImagePath = uploadedPhoto.Id;
+
+                var processedPhoto = await _photoService.GetPhoto(accessToken, uploadedPhoto.Id);
+                note.ImageUrl =  $"{processedPhoto.BaseUrl}=w2048-h1024";
+            }
+
+            var updateDef = new UpdateDefinitionBuilder<NoteDto>()
+                    .Set(x => x.Body, note.Body)
+                    .Set(x => x.Header, note.Header)
+                    .Set(x => x.ImagePath, note.ImagePath)
+                    .Set(x => x.ImageUrl, note.ImageUrl);
+
+            await _notesCollection.UpdateOneAsync(f => f.Id == objectId, updateDef);
+
+            Note returnNote = _mapper.Map<Note>(note);
+            return new ActionResult<Note>(returnNote);
         }
 
         // DELETE api/values/5
